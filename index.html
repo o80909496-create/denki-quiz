@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>電気磁気学 50問 超図解クイズ</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", MeiYo, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #1a365d;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .progress {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .question-box {
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-btn {
+            padding: 14px 20px;
+            font-size: 16px;
+            text-align: left;
+            background-color: #edf2f7;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover {
+            background-color: #e2e8f0;
+            border-color: #a0aec0;
+        }
+        .option-btn.correct {
+            background-color: #c6f6d5;
+            border-color: #38a169;
+            color: #22543d;
+            font-weight: bold;
+        }
+        .option-btn.wrong {
+            background-color: #fed7d7;
+            border-color: #e53e3e;
+            color: #742a2a;
+        }
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fffaf0;
+            border: 1px solid #feebc8;
+            border-radius: 8px;
+            line-height: 1.6;
+            display: none;
+            white-space: pre-wrap;
+            font-family: monospace, sans-serif;
+        }
+        .explanation-title {
+            font-weight: bold;
+            color: #dd6b20;
+            margin-bottom: 8px;
+            font-family: sans-serif;
+        }
+        .next-btn {
+            margin-top: 25px;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #3182ce;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+        }
+        .next-btn:hover {
+            background-color: #2b6cb0;
+        }
+        .result-box {
+            text-align: center;
+            padding: 20px;
+        }
+        .result-score {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2b6cb0;
+            margin: 20px 0;
+        }
+        .restart-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            background-color: #38a169;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>電気磁気学 50問 超図解クイズ</h1>
+    
+    <div id="quiz-screen">
+        <div class="progress" id="progress">問題 1 / 50</div>
+        <div class="question-box" id="question">読み込み中...</div>
+        <div class="options" id="options"></div>
+        <div class="explanation" id="explanation">
+            <div class="explanation-title">🎨 超図解ステップ解説</div>
+            <div id="explanation-text"></div>
+        </div>
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">次の問題へ</button>
+    </div>
+
+    <div id="result-screen" class="result-box" style="display: none;">
+        <h2>演習終了！</h2>
+        <div>お疲れ様でした。あなたのスコアは以下の通りです。</div>
+        <div class="result-score" id="result-score">0 / 50 点</div>
+        <button class="restart-btn" onclick="restartQuiz()">もう一度解く</button>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    // 【第1章：磁界と磁極】
+    {
+        q: "真空中にて、磁極1（5.0×10^-4 Wb）と 磁極2（1.2×10^-4 Wb）を 15 cm（0.15 m）離して置いた。\n両方の磁極の間に働く磁力 F [N] はいくらか？",
+        options: ["0.08 N", "0.17 N", "0.34 N", "0.52 N"],
+        answer: 1,
+        exp: "【イメージ図】\n  [m1] <--- 距離 r ---> [m2]\n  磁石どうしが引き合う/退けあう力\n\n【解き方】\n1. 公式：F = 6.33×10^4 × (m1 × m2) ÷ r^2\n2. 計算：6.33×10^4 × (5.0×10^-4 × 1.2×10^-4) ÷ (0.15)^2 ≒ 0.17 N\n★注意：cmは必ず「m（0.15）」に直して2乗！"
+    },
+    {
+        q: "真空中に 4.0×10^-4 Wb の「S極」がある。\nこの磁極から 40 cm（0.4 m）離れた場所の磁界の強さ H [A/m] と、その向きは？",
+        options: ["158.3 A/m（S極に向かう向き）", "158.3 A/m（S極から遠ざかる向き）", "316.5 A/m（S極に向かう向き）", "79.1 A/m（S極から遠ざかる向き）"],
+        answer: 0,
+        exp: "【イメージ図】\n  (場所) ====== 磁界の向き ======> [ S極 ]\n  ※S極は磁力を「吸い込む」！\n\n【解き方】\n1. 強さ：H = 6.33×10^4 × m ÷ r^2\n2. 計算：6.33×10^4 × (4.0×10^-4) ÷ (0.4)^2 ≒ 158.3 A/m\n3. 向き：S極に向かって吸い込まれる方向！"
+    },
+    {
+        q: "強さ 8.0 A/m の磁界の中に、2.5×10^-6 Wb の磁極を置いた。\nこの磁極に働く力 F [N] はいくらか？",
+        options: ["1.0×10^-5 N", "2.0×10^-5 N", "3.1×10^-7 N", "5.0×10^-6 N"],
+        answer: 1,
+        exp: "【イメージ図】\n  [ 磁界 H ] ──> [ 磁極 m ] ──> 力 F\n  風（磁界）に乗って動くイメージ\n\n【解き方】\n1. 公式：力 F = m × H\n2. 計算：(2.5×10^-6) × 8.0 = 2.0×10^-5 N\n★ワンポイント：かけるだけの超シンプル計算！"
+    },
+    {
+        q: "強さ 7.0×10^-5 Wb の磁極に 3.5×10^-2 N の力が働いている。\nこの場所の磁界の強さ H [A/m] はいくらか？",
+        options: ["250 A/m", "500 A/m", "750 A/m", "1000 A/m"],
+        answer: 1,
+        exp: "【イメージ図】\n  力 F = 磁極 m × 磁界 H  から 磁界 H を割り出す！\n\n【解き方】\n1. 公式：H = F ÷ m\n2. 計算：(3.5×10^-2) ÷ (7.0×10^-5) = 500 A/m"
+    },
+    {
+        q: "磁極1（4.0×10^-5 Wb）と 磁極2（5.0×10^-5 Wb）の間に 2.25×10^-2 N の引き合う力が働いている。\n2つの磁極間の距離は何 cm か？",
+        options: ["15.2 cm", "23.7 cm", "30.5 cm", "42.1 cm"],
+        answer: 1,
+        exp: "【イメージ図】\n  [m1] <--- (距離 r) ---> [m2]\n\n【解き方】\n1. 式変形：r^2 = 6.33×10^4 × (m1 × m2) ÷ F\n2. 計算：r^2 = 0.05626 → r ≒ 0.237 m\n3. cm変換：0.237 m × 100 = 23.7 cm"
+    },
+    {
+        q: "真空中で 3.5×10^-7 Wb の磁極から 25 cm（0.25 m）離れた場所の、磁界の強さ H と 磁束密度 B は？",
+        options: ["H = 0.35 A/m, B = 4.45×10^-7 T", "H = 0.70 A/m, B = 8.90×10^-7 T", "H = 0.35 A/m, B = 1.25×10^-6 T", "H = 0.18 A/m, B = 2.22×10^-7 T"],
+        answer: 0,
+        exp: "【イメージ図】\n  磁極 → [ 磁界 H ] → [ 磁束密度 B (＝μ0×H) ]\n\n【解き方】\n1. H = 6.33×10^4 × (3.5×10^-7) ÷ (0.25)^2 ≒ 0.35 A/m\n2. B = (4π×10^-7) × 0.35 ≒ 4.45×10^-7 T"
+    },
+    {
+        q: "2.0×10^-5 Wb の「N極」を置いたら、東向きに 4.0×10^-3 N の力が働いた。\n磁界の強さ H と、その向きは？",
+        options: ["100 A/m（西向き）", "200 A/m（東向き）", "200 A/m（西向き）", "400 A/m（東向き）"],
+        answer: 1,
+        exp: "【イメージ図】\n  [ N極 ] ━━ 東向きの力 ━━>\n  ※N極が押される方向＝磁界の向き！\n\n【解き方】\n1. H = F ÷ m = (4.0×10^-3) ÷ (2.0×10^-5) = 200 A/m\n2. 向き：N極が動く方向そのまま「東向き」！"
+    },
+    {
+        q: "同じ強さの「N極」を2つ、10 cm（0.1 m）離して置いたら 1.6×10^-3 N で退け合った。\n各磁極の強さ m はいくらか？",
+        options: ["0.80×10^-5 Wb", "1.59×10^-5 Wb", "3.18×10^-5 Wb", "2.52×10^-10 Wb"],
+        answer: 1,
+        exp: "【イメージ図】\n  [ m ] <━━ (反発力 F) ━━> [ m ]\n\n【解き方】\n1. m^2 = (F × r^2) ÷ (6.33×10^4)\n2. m^2 = (1.6×10^-3 × 0.01) ÷ (6.33×10^4) = 2.527×10^-10\n3. √を外す：m ≒ 1.59×10^-5 Wb"
+    },
+    {
+        q: "磁束密度 B = 0.5 T の磁界中に、面積 2.0 cm^2（0.0002 m^2）の板を垂直に置いた。\n通過する磁束 Φ [Wb] はいくらか？",
+        options: ["1.0×10^-4 Wb", "2.0×10^-4 Wb", "1.0×10^-2 Wb", "4.0×10^-4 Wb"],
+        answer: 0,
+        exp: "【イメージ図】\n  │║║║│ ← 磁束(束)\n  │║║║│ 板(面積 A)\n  磁束 Φ = 密度 B × 面積 A\n\n【解き方】\n1. 計算：0.5 T × 0.0002 m^2 = 1.0×10^-4 Wb"
+    },
+    {
+        q: "磁束 1.2×10^-3 Wb が、断面積 4.0 cm^2（0.0004 m^2）を通っている。\nこのときの磁束密度 B [T] はいくらか？",
+        options: ["0.3 T", "1.5 T", "3.0 T", "4.8 T"],
+        answer: 2,
+        exp: "【イメージ図】\n  密度 = 全体の量 ÷ 面積\n\n【解き方】\n1. 公式：B = Φ ÷ A\n2. 計算：(1.2×10^-3) ÷ 0.0004 = 3.0 T"
+    },
+
+    // 【第2章：電流がつくる磁界】
+    {
+        q: "半径 25 cm（0.25 m）の1回巻き円形コイルに 4.5 A の電流を流した。\nコイル中心の磁界の強さ H [A/m] はいくらか？",
+        options: ["4.5 A/m", "9.0 A/m", "18.0 A/m", "28.3 A/m"],
+        answer: 1,
+        exp: "【イメージ図】\n    ╭───╮\n    │ ◉ │ ←中心の磁界 H\n    ╰───╯\n\n【解き方】\n1. 円形コイル中心の公式：H = I ÷ (2r)\n2. 計算：4.5 ÷ (2 × 0.25) = 9.0 A/m\n★π（パイ）は使いません！"
+    },
+    {
+        q: "まっすぐ伸びた長い導体に 18 A の電流を流した。\n導体から 14.3 cm（0.143 m）離れた場所の磁界の強さ H [A/m] はいくらか？",
+        options: ["10.0 A/m", "20.0 A/m", "30.0 A/m", "62.9 A/m"],
+        answer: 1,
+        exp: "【イメージ図】\n     │ 電流 I\n  ───┼─── (距離 r) ─◯ (磁界 H)\n     │\n\n【解き方】\n1. 直線導体の公式：H = I ÷ (2πr)\n2. 計算：18 ÷ (2 × 3.14 × 0.143) ≒ 20.0 A/m\n★直線は「周長(2πr)」で割る！"
+    },
+    {
+        q: "平均半径 15 cm（0.15 m）、250回巻きのドーナツ型（環状）コイルに 3.0 A を流した。\n内部の磁界の強さ H [A/m] はいくらか？",
+        options: ["398 A/m", "796 A/m", "1592 A/m", "2500 A/m"],
+        answer: 1,
+        exp: "【イメージ図】\n   ◎ (ドーナツの中に磁界がぐるぐる閉じ込められる)\n\n【解き方】\n1. 公式：H = (N × I) ÷ (2πr)\n2. 計算：(250 × 3.0) ÷ (2 × 3.1416 × 0.15) ≒ 796 A/m"
+    },
+    {
+        q: "電流 5.0 A を流したときに内部磁界が 200 A/m になるソレノイド（筒状コイル）がある。\n「10 cm あたり」の巻数は何回か？",
+        options: ["2 回", "4 回", "20 回", "40 回"],
+        answer: 1,
+        exp: "【イメージ図】\n  ┌──────┐\n  └──────┘ (筒状ソレノイド)\n\n【解き方】\n1. 1mあたりの巻数 n = H ÷ I = 200 ÷ 5.0 = 40 回/m\n2. 10cm(0.1m)あたり：40 × 0.1 = 4 回！"
+    },
+    {
+        q: "半径 10 cm（0.1 m）の円形コイルに 0.1 A の電流を流し、中心に 2.5 A/m の磁界を作りたい。\n巻数は何回にすればよいか？",
+        options: ["2 回", "5 回", "10 回", "25 回"],
+        answer: 1,
+        exp: "【イメージ図】\n  H = (N × I) ÷ (2r) から N（巻数）を逆算！\n\n【解き方】\n1. 公式：N = (2r × H) ÷ I\n2. 計算：(2 × 0.10 × 2.5) ÷ 0.10 = 5 回"
+    },
+    {
+        q: "まっすぐ伸びた長い導体から 15 cm（0.15 m）離れた点の磁界が 30 A/m であった。\n流れている電流 I [A] はいくらか？",
+        options: ["14.1 A", "28.3 A", "45.0 A", "56.5 A"],
+        answer: 1,
+        exp: "【イメージ図】\n  H = I ÷ (2πr) から I（電流）を逆算！\n\n【解き方】\n1. 公式：I = H × 2πr\n2. 計算：30 × (2 × 3.1416 × 0.15) ≒ 28.3 A"
+    },
+    {
+        q: "長さ 20 cm（0.2 m）、巻数 350 回のコイルに 5.0 A を流した（透磁率 μ = 1.25×10^-3 H/m）。\n磁界の強さ H と 磁束密度 B は？",
+        options: ["H = 8.75 kA/m, B = 11 T", "H = 17.5 kA/m, B = 22 T", "H = 4.38 kA/m, B = 5.5 T", "H = 8.75 kA/m, B = 0.011 T"],
+        answer: 0,
+        exp: "【イメージ図】\n  [コイル] ─> 磁界 H ─> 磁束密度 B(＝μH)\n\n【解き方】\n1. H = (N × I) ÷ L = (350 × 5) ÷ 0.2 = 8750 A/m = 8.75 kA/m\n2. B = μ × H = (1.25×10^-3) × 8750 ≒ 11 T"
+    },
+    {
+        q: "2本のエナメル線を並べ、同じ向きにそれぞれ 10 A（合計 20 A）の電流を流した。\n2本から 20 cm（0.2 m）離れた場所の磁界 H は？",
+        options: ["7.95 A/m", "15.9 A/m", "31.8 A/m", "62.8 A/m"],
+        answer: 1,
+        exp: "【イメージ図】\n  (↑)(↑) 電流が合体！ 合計 I = 10 + 10 = 20 A\n\n【解き方】\n1. H = I_total ÷ (2πr)\n2. 計算：20 ÷ (2 × 3.1416 × 0.20) ≒ 15.9 A/m"
+    },
+    {
+        q: "平均半径 10 cm（0.1 m）、500回巻きの環状ソレノイドに 2.0 A を流した。\n中心軸上の磁界 H [A/m] はいくらか？",
+        options: ["796 A/m", "1592 A/m", "3183 A/m", "5000 A/m"],
+        answer: 1,
+        exp: "【イメージ図】\n  ◎ 環状ソレノイドの基本公式！\n\n【解き方】\n1. H = (N × I) ÷ (2πr)\n2. 計算：(500 × 2.0) ÷ (2 × 3.1416 × 0.10) ≒ 1592 A/m"
+    },
+    {
+        q: "1m あたり 1000 回巻かれた長いソレノイドに 2.0 A を流した。\n内部中心での磁束密度 B [mT] は？（真空中の透磁率使用）",
+        options: ["1.26 mT", "2.51 mT", "5.02 mT", "12.57 mT"],
+        answer: 1,
+        exp: "【イメージ図】\n  H = n × I  →  B = μ0 × H\n\n【解き方】\n1. H = 1000 × 2.0 = 2000 A/m\n2. B = (4π×10^-7) × 2000 ≒ 0.00251 T = 2.51 mT"
+    },
+
+    // 【第3章：電磁力】
+    {
+        q: "磁束密度 3.2 T の磁界に対し垂直に置いた、長さ 15 cm（0.15 m）の導線に 2.5 A を流した。\n受ける力 F [N] はいくらか？",
+        options: ["0.6 N", "1.2 N", "2.4 N", "12.0 N"],
+        answer: 1,
+        exp: "【イメージ図】\n   ↓ 磁界 B\n  ───導線(I)───>  ⇒【力 F が発生！】\n\n【解き方】\n1. 公式：F = B × I × L  (ビル: BIL)\n2. 計算：3.2 × 2.5 × 0.15 = 1.2 N"
+    },
+    {
+        q: "5.0 cm（0.05 m）離れた2本の平行導線に、同じ方向に 50 A ずつ電流を流した。\n導線 1 m あたりに働く力と、その種類は？",
+        options: ["0.01 N/m（引き合う力）", "0.01 N/m（退け合う力）", "0.02 N/m（引き合う力）", "0.005 N/m（退け合う力）"],
+        answer: 0,
+        exp: "【イメージ図】\n  │↑│↑│  同じ向き ＝【引き合う(仲良し)】\n  │↓│↑│  逆向き   ＝【退け合う(ケンカ)】\n\n【解き方】\n1. F = (2 × I1 × I2 ÷ r) × 10^-7\n2. (2 × 50 × 50 ÷ 0.05) × 10^-7 = 0.01 N/m"
+    },
+    {
+        q: "縦 4.5 cm（0.045 m）、横 3.5 cm（0.035 m）の30回巻コイルに 0.8 A を流した（B = 2.6 T）。\n受ける力 F と、最大トルク T は？",
+        options: ["F = 2.81 N, T = 0.098 N・m", "F = 1.40 N, T = 0.049 N・m", "F = 2.81 N, T = 0.196 N・m", "F = 5.62 N, T = 0.098 N・m"],
+        answer: 0,
+        exp: "【イメージ図】\n  ┌──┐\n  │ ↺│ 回す力(トルク T) ＝ 力 F × 横幅\n  └──┘\n\n【解き方】\n1. 力 F = N × B × I × 縦 = 30 × 2.6 × 0.8 × 0.045 ≒ 2.81 N\n2. トルク T = F × 横幅 = 2.81 × 0.035 ≒ 0.098 N・m"
+    },
+    {
+        q: "0.8 T の磁界の中に置いた長さ 1.4 m の導線に電流を流すと、7.8 N の力が働いた。\n流れている電流 I [A] はいくらか？",
+        options: ["3.48 A", "6.96 A", "13.9 A", "20.0 A"],
+        answer: 1,
+        exp: "【イメージ図】\n  F = B I L より I（電流）を割り出す！\n\n【解き方】\n1. 公式：I = F ÷ (B × L)\n2. 計算：7.8 ÷ (0.8 × 1.4) ≒ 6.96 A"
+    },
+    {
+        q: "磁束密度 1.5 T の磁界に対し「60°の傾き」で置かれた長さ 30 cm（0.3 m）の導線に 8.0 A を流した。\n受ける力 F [N] はいくらか？",
+        options: ["1.80 N", "2.70 N", "3.12 N", "3.60 N"],
+        answer: 2,
+        exp: "【イメージ図】\n    ／ (斜め60°)\n  ───  ⇒ sin(60°) ≒ 0.866 を掛ける！\n\n【解き方】\n1. 公式：F = B × I × L × sin(θ)\n2. 計算：1.5 × 8.0 × 0.3 × 0.866 ≒ 3.12 N"
+    },
+    {
+        q: "10 cm（0.1 m）離れた2本の平行導線に「反対向き」に 20 A と 30 A を流した。\n導線 2 m 全体にかかる力 F は？",
+        options: ["1.2×10^-3 N（引き合う力）", "2.4×10^-3 N（退け合う力）", "2.4×10^-3 N（引き合う力）", "4.8×10^-3 N（退け合う力）"],
+        answer: 1,
+        exp: "【イメージ図】\n  │↑│↓│  逆向き＝退け合う力！\n\n【解き方】\n1. 1mの力 = (2 × 20 × 30 ÷ 0.1) × 10^-7 = 1.2×10^-3 N\n2. 2m全体 = 1.2×10^-3 × 2 = 2.4×10^-3 N"
+    },
+    {
+        q: "0.4 T の磁界の中で、長さ 20 cm（0.2 m）の導線が 5.0 N の力を受けている。\n流れている電流 I [A] はいくらか？",
+        options: ["25.0 A", "62.5 A", "100.0 A", "125.0 A"],
+        answer: 1,
+        exp: "【イメージ図】\n  F = B I L の逆算！\n\n【解き方】\n1. I = F ÷ (B × L)\n2. 計算：5.0 ÷ (0.4 × 0.20) = 62.5 A"
+    },
+    {
+        q: "面積 20 cm^2（0.002 m^2）、100回巻のコイルに 0.5 A を流した（B = 0.2 T）。\nコイルにかかる最大トルク T [N・m] は？",
+        options: ["0.01 N・m", "0.02 N・m", "0.04 N・m", "0.20 N・m"],
+        answer: 1,
+        exp: "【イメージ図】\n  トルク T = 巻数 N × B × I × 面積 S\n\n【解き方】\n1. 計算：100 × 0.2 × 0.5 × 0.002 = 0.02 N・m"
+    },
+    {
+        q: "5.0 cm（0.05 m）離れた平行導線の一方に 10 A を流すと、1m あたり 4.0×10^-4 N の力が働いた。\nもう一方の導線に流れている電流 I [A] は？",
+        options: ["5.0 A", "10.0 A", "20.0 A", "50.0 A"],
+        answer: 1,
+        exp: "【イメージ図】\n  2本の導線に働く力の公式から I2 を出す！\n\n【解き方】\n1. 式：F = (2 × I1 × I2 ÷ r) × 10^-7\n2. 代入：4.0×10^-4 = (2 × 10 × I2 ÷ 0.05) × 10^-7 → I2 = 10 A"
+    },
+    {
+        q: "0.5 T の磁界に対し「30°の角度」で置かれた長さ 50 cm（0.5 m）の導線に 4.0 A を流した。\n受ける力 F [N] はいくらか？",
+        options: ["0.25 N", "0.50 N", "0.86 N", "1.00 N"],
+        answer: 1,
+        exp: "【イメージ図】\n  sin(30°) ＝ 0.5 （半分になる！）\n\n【解き方】\n1. F = B × I × L × sin(30°)\n2. 計算：0.5 × 4.0 × 0.5 × 0.5 = 0.50 N"
+    },
+
+    // 【第4章：磁気回路】
+    {
+        q: "長さ 75 cm（0.75 m）、250回巻のコイルに 6.0 A を流した（透磁率 μ = 4.4×10^-3, 面積 A = 3.0×10^-4）。\n起磁力 Fm と 磁気抵抗 Rm は？",
+        options: ["Fm = 1.5 kA, Rm = 5.68×10^5 H^-1", "Fm = 1.5 kA, Rm = 2.84×10^5 H^-1", "Fm = 750 A, Rm = 5.68×10^5 H^-1", "Fm = 3.0 kA, Rm = 1.14×10^6 H^-1"],
+        answer: 0,
+        exp: "【電気回路との比較図】\n  電気回路：電圧 V ─── 抵抗 R\n  磁気回路：起磁力 Fm ─ 磁気抵抗 Rm\n\n【解き方】\n1. 起磁力 Fm = 巻数 × 電流 = 250 × 6.0 = 1500 A = 1.5 kA\n2. 磁気抵抗 Rm = 長さ ÷ (μ × 面積) ≒ 5.68×10^5 H^-1"
+    },
+    {
+        q: "150回巻のコイルに 4.0 A を流すと、2.5×10^-2 Wb の磁束が発生した。\n起磁力 Fm と 磁気抵抗 Rm は？",
+        options: ["Fm = 600 A, Rm = 2.4×10^4 H^-1", "Fm = 600 A, Rm = 4.8×10^4 H^-1", "Fm = 300 A, Rm = 1.2×10^4 H^-1", "Fm = 1200 A, Rm = 2.4×10^4 H^-1"],
+        answer: 0,
+        exp: "【イメージ図】\n  オームの法則：R = V ÷ I\n  磁気オーム律：Rm = Fm ÷ Φ\n\n【解き方】\n1. Fm = 150 × 4.0 = 600 A\n2. Rm = 600 ÷ (2.5×10^-2) = 2.4×10^4 H^-1"
+    },
+    {
+        q: "長さ 50 cm（0.5 m）、断面積 10 cm^2（0.001 m^2）の鉄心（比透磁率 μr = 2000）の磁気抵抗 Rm は？",
+        options: ["1.99×10^5 H^-1", "3.98×10^5 H^-1", "0.99×10^5 H^-1", "7.96×10^5 H^-1"],
+        answer: 0,
+        exp: "【イメージ図】\n  Rm = L ÷ (μ0 × μr × A)\n\n【解き方】\n1. 計算：0.5 ÷ (4π×10^-7 × 2000 × 0.001) ≒ 1.99×10^5 H^-1"
+    },
+    {
+        q: "起磁力 Fm = 1000 A、磁気抵抗 Rm = 5.0×10^5 H^-1 の回路を通る磁束 Φ [mWb] は？",
+        options: ["1.0 mWb", "2.0 mWb", "4.0 mWb", "5.0 mWb"],
+        answer: 1,
+        exp: "【イメージ図】\n  磁束 Φ (電流 I に相当) ＝ 起磁力 Fm ÷ 抵抗 Rm\n\n【解き方】\n1. Φ = 1000 ÷ (5.0×10^5) = 0.002 Wb = 2.0 mWb"
+    },
+    {
+        q: "磁気抵抗 2.0×10^5 H^-1 の鉄心に 0.01 Wb の磁束を通したい。\n必要な起磁力 Fm [kA] はいくらか？",
+        options: ["1.0 kA", "2.0 kA", "4.0 kA", "20 kA"],
+        answer: 1,
+        exp: "【イメージ図】\n  Fm (電圧 V に相当) ＝ 抵抗 Rm × 磁束 Φ\n\n【解き方】\n1. Fm = (2.0×10^5) × 0.01 = 2000 A = 2.0 kA"
+    },
+    {
+        q: "断面積 5.0 cm^2（0.0005 m^2）、長さ 40 cm（0.4 m）、400回巻（μr = 1000）の鉄心に 2.0 A を流した。\n発生する磁束 Φ [Wb] は？",
+        options: ["0.63×10^-3 Wb", "1.26×10^-3 Wb", "2.51×10^-3 Wb", "5.02×10^-3 Wb"],
+        answer: 1,
+        exp: "【ステップ解法】\n1. 起磁力 Fm = 400 × 2.0 = 800 A\n2. 磁気抵抗 Rm = 0.4 ÷ (4π×10^-7 × 1000 × 0.0005) ≒ 6.366×10^5\n3. 磁束 Φ = 800 ÷ (6.366×10^5) ≒ 1.26×10^-3 Wb"
+    },
+    {
+        q: "隙間の長さ 1.0 mm（0.001 m）、断面積 4.0 cm^2（0.0004 m^2）の「空気ギャップ」の磁気抵抗 Rm は？",
+        options: ["0.99×10^6 H^-1", "1.99×10^6 H^-1", "3.98×10^6 H^-1", "7.96×10^6 H^-1"],
+        answer: 1,
+        exp: "【イメージ図】\n  [鉄心] █ █ [空気の隙間] █ █ [鉄心]\n  ※空気は磁気抵抗が非常に大きい！\n\n【解き方】\n1. Rm = 隙間 ÷ (μ0 × 面積)\n2. 0.001 ÷ (4π×10^-7 × 0.0004) ≒ 1.99×10^6 H^-1"
+    },
+    {
+        q: "起磁力 800 A で、鉄心部の抵抗 1.0×10^5 H^-1 と 空気隙の抵抗 3.0×10^5 H^-1 が直列になっている。\n磁束 Φ [mWb] は？",
+        options: ["1.0 mWb", "2.0 mWb", "2.67 mWb", "8.0 mWb"],
+        answer: 1,
+        exp: "【イメージ図】\n  ┌──[鉄心抵抗]──[空気抵抗]──┐ (直列足し算)\n\n【解き方】\n1. 合計抵抗 R_total = (1.0 + 3.0) × 10^5 = 4.0×10^5\n2. 磁束 Φ = 800 ÷ (4.0×10^5) = 0.002 Wb = 2.0 mWb"
+    },
+    {
+        q: "鉄などの磁性体の B-H 曲線において、外からの磁界 H をゼロ（0）に戻しても残っている磁束密度 B を何というか？",
+        options: ["保持力（保磁力）", "残留磁束密度", "飽和磁束密度", "比透磁率"],
+        answer: 1,
+        exp: "【ヒステリシスグラフ図】\n       B (磁束)\n       │  ★ここに「残った」磁気！\n  ───┼─── H (磁界)\n       │\n\n★名前そのまま「残留（残った）磁束密度」です！"
+    },
+    {
+        q: "B-H 曲線において、残ってしまった残留磁束密度をゼロ（0）に消し去るために必要な、反対向きの磁界の強さを何というか？",
+        options: ["保持力（保磁力）", "起磁力", "減磁力", "臨界磁界"],
+        answer: 0,
+        exp: "【ヒステリシスグラフ図】\n       B\n  ★←─┼─── H  (打ち消す逆向きの磁界)\n       │\n\n★残った磁気をゼロに押さえ込んで「保つ」力 ＝ 保磁力（保持力）！"
+    },
+
+    // 【第5章：電磁誘導】
+    {
+        q: "磁束密度 1.2 T の磁界の中を、長さ 75 cm（0.75 m）の導線が 15 m/s のスピードで垂直に切るように動いている。\n発生する電圧（誘導起電力）e [V] は？",
+        options: ["6.75 V", "13.5 V", "27.0 V", "135 V"],
+        answer: 1,
+        exp: "【イメージ図】\n  磁界をバシバシ切り裂いて進む！\n   ↓ ↓ ↓ 磁界\n   ───> 棒の動き v\n\n【解き方】\n1. 公式：e = B × L × v  (ウル: BLV)\n2. 計算：1.2 × 0.75 × 15 = 13.5 V"
+    },
+    {
+        q: "コイルを貫く磁束が 0.5 秒間に 0.8 Wb から 0 Wb に変化し、600 V の電圧が発生した。\nこのコイルの巻数は何回か？",
+        options: ["150 回", "375 回", "750 回", "1200 回"],
+        answer: 1,
+        exp: "【イメージ図】\n  ファラデーの法則：電圧 e = N × (磁束変化 ÷ 時間)\n\n【解き方】\n1. 巻数 N = (電圧 × 時間) ÷ 磁束変化\n2. 計算：(600 × 0.5) ÷ 0.8 = 375 回"
+    },
+    {
+        q: "B = 1.6 T、長さ 25 cm（0.25 m）の導線を 12 m/s で動かした。\n角度が「30°」「60°」「90°」のときの電圧は？",
+        options: ["30°: 2.4V, 60°: 4.16V, 90°: 4.8V", "30°: 2.4V, 60°: 3.60V, 90°: 4.8V", "30°: 1.2V, 60°: 2.08V, 90°: 2.4V", "30°: 4.8V, 60°: 4.16V, 90°: 2.4V"],
+        answer: 0,
+        exp: "【イメージ図】\n  90°(直角)が最高パワー！ 斜めになると sin(θ) で弱まる！\n\n【解き方】\n1. 最大(90°)：1.6 × 0.25 × 12 = 4.8 V\n2. 30°：4.8 × sin(30°) = 2.4 V\n3. 60°：4.8 × sin(60°) ≒ 4.16 V"
+    },
+    {
+        q: "500回巻のコイルを貫く磁束が、0.3 秒間に 6.0×10^-3 Wb 変化した。\n発生する電圧 e [V] はいくらか？",
+        options: ["5 V", "10 V", "20 V", "30 V"],
+        answer: 1,
+        exp: "【イメージ図】\n  電圧 ＝ 巻数 × (1秒あたりの磁束の変化量)\n\n【解き方】\n1. 計算：500 × (6.0×10^-3 ÷ 0.3) = 10 V"
+    },
+    {
+        q: "幅 60 cm（0.6 m）のレール上の棒を B = 1.5 T 中で 30 m/s で動かした（抵抗 R = 30 Ω）。\n電圧 e、電流 I、受ける抵抗力 F は？",
+        options: ["e = 27V, I = 0.9A, F = 0.81N", "e = 54V, I = 1.8A, F = 1.62N", "e = 27V, I = 0.9A, F = 1.35N", "e = 13.5V, I = 0.45A, F = 0.41N"],
+        answer: 0,
+        exp: "【3ステップ解法】\n1. 電圧 e = BLv = 1.5 × 0.6 × 30 = 27 V\n2. 電流 I = e ÷ R = 27 ÷ 30 = 0.9 A\n3. 抵抗力 F = BIL = 1.5 × 0.9 × 0.6 = 0.81 N"
+    },
+    {
+        q: "0.02 秒というごく短い間に 0.1 Wb の磁束が変化した（巻数 200 回）。\n発生する電圧 e [V] はいくらか？",
+        options: ["200 V", "500 V", "1000 V", "2000 V"],
+        answer: 2,
+        exp: "【イメージ図】\n  短時間で一気に変化させるほど巨大な電圧が発生！\n\n【解き方】\n1. e = N × (ΔΦ ÷ Δt)\n2. 計算：200 × (0.1 ÷ 0.02) = 1000 V"
+    },
+    {
+        q: "長さ 40 cm（0.4 m）の棒が 0.5 T の磁界中を垂直に 20 m/s で移動している。\n棒の両端に現れる電圧 e [V] は？",
+        options: ["2.0 V", "4.0 V", "8.0 V", "10.0 V"],
+        answer: 1,
+        exp: "【基本公式】\n  e = B × L × v\n\n【解き方】\n1. 計算：0.5 × 0.40 × 20 = 4.0 V"
+    },
+    {
+        q: "磁束の変化が Φ(t) = 4t^2 + 2t という式で表されている。\nt = 2 秒の瞬間に1回巻きコイルに発生する電圧 e [V] は？",
+        options: ["10 V", "18 V", "20 V", "36 V"],
+        answer: 1,
+        exp: "【イメージ図】\n  式の中に t が入っている＝【微分】して変化スピードを出す！\n\n【解き方】\n1. Φ(t) を微分：dΦ/dt = 8t + 2\n2. t = 2 秒を代入：(8 × 2) + 2 = 18 V"
+    },
+    {
+        q: "「レンツの法則」において、誘導起電力（流れる電流）の向きに関する説明として正しいものはどれか？",
+        options: ["磁束の変化をさらに増やす方向に生じる", "磁束の変化を妨げる（邪魔する）方向に生じる", "常に元の電流と同じ方向に生じる", "磁界の強さに比例して右ねじの向きに生じる"],
+        answer: 1,
+        exp: "【イメージ図】\n  磁石が近づく！ ──> ✋「来ないで！」と押し返す磁界を作る\n  磁石が離れる！ <── 🤝「行かないで！」と引き止める磁界を作る\n\n★常に「変化を邪魔する方向」に流れます！"
+    },
+    {
+        q: "磁界 B の中で、面積 S・巻数 N のコイルを角速度 ω でぐるぐる回転させるときに現れる「最大の電圧 Em」を表す公式は？",
+        options: ["Em = N B S ω", "Em = N B S / ω", "Em = B S ω / N", "Em = 2π N B S ω"],
+        answer: 0,
+        exp: "【イメージ図】\n     ┌──┐  ↺ ぐるぐる回転！\n     └──┘\n\n★覚え方：登場人物（N, B, S, ω）を「全部かけ算」するだけ！\n  Em = N B S ω"
+    }
+];
+
+let currentIdx = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+    answered = false;
+    const q = quizData[currentIdx];
+    document.getElementById("progress").innerText = `問題 ${currentIdx + 1} / ${quizData.length}`;
+    document.getElementById("question").innerText = `[問${currentIdx + 1}]\n${q.q}`;
+    
+    const optionsContainer = document.getElementById("options");
+    optionsContainer.innerHTML = "";
+    
+    q.options.forEach((opt, index) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.innerText = `${index + 1}. ${opt}`;
+        btn.onclick = () => checkAnswer(index);
+        optionsContainer.appendChild(btn);
+    });
+
+    document.getElementById("explanation").style.display = "none";
+    document.getElementById("next-btn").style.display = "none";
+}
+
+function checkAnswer(selectedIndex) {
+    if (answered) return;
+    answered = true;
+
+    const q = quizData[currentIdx];
+    const buttons = document.querySelectorAll(".option-btn");
+
+    if (selectedIndex === q.answer) {
+        buttons[selectedIndex].classList.add("correct");
+        score++;
+    } else {
+        buttons[selectedIndex].classList.add("wrong");
+        buttons[q.answer].classList.add("correct");
+    }
+
+    document.getElementById("explanation-text").innerText = q.exp;
+    document.getElementById("explanation").style.display = "block";
+    document.getElementById("next-btn").style.display = "block";
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < quizData.length) {
+        loadQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    document.getElementById("quiz-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+    document.getElementById("result-score").innerText = `${score} / ${quizData.length} 点`;
+}
+
+function restartQuiz() {
+    currentIdx = 0;
+    score = 0;
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("quiz-screen").style.display = "block";
+    loadQuestion();
+}
+
+// アプリ起動
+loadQuestion();
+</script>
+
+</body>
+</html>
